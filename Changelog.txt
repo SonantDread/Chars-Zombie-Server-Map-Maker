@@ -1,0 +1,13 @@
+v2:
+	moved zombie portal to a seperate tab called "ZFB" (Zaniac)
+	changed brush to start on the circle one (Zaniac)
+	added the changelog file (Zaniac)
+
+v1:
+	zombie portals are now able to be stacked next to each other (Zaniac)
+	zombie portals now place at your cursor instead of placing directly at your character (Zaniac)
+	
+v0:
+	added zombie portal (Zaniac)
+	fixed multiplayer (Guift)
+	mod taken from: https://discordapp.com/channels/337250580303052801/337464956784214016/910461627814531082
