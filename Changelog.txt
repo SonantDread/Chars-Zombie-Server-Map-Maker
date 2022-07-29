@@ -1,3 +1,6 @@
+v3:
+	added !generatemap *width height* (Guift)
+
 v2:
 	added chainsaw, gas lantern and, all zombies (Zaniac)
 	moved zombie portal to a seperate tab called "ZFB" (Zaniac)
