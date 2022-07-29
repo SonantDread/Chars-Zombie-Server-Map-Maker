@@ -234,7 +234,7 @@ void onInit(CInventory@ this)
 	blob.set_u8("replace type", 2);
 	blob.set_u8("brush type", 0);	// starts on square // cache this stuff at some stage.
 	blob.set_u8("brush arrow", 0);	
-	blob.set_u8("colour selected", 1);
+	blob.set_u8("colour selected", 0);
 	blob.set_u8("phase selected", 0);
 	blob.set_u8("grid selected", 0);
 	getRules().set_u8("light selected", 0);

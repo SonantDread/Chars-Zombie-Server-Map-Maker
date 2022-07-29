@@ -133,8 +133,17 @@ u8 getBuildBlobIndex(string name)
 	"ainecromancer",
 	"dummy",
 
-	//PAGE 7
+	//CharZFB, PAGE 7
 	"ZombiePortal",
+	"abomination",
+	"chainsaw",
+	"gaslantern",
+	"Skeleton",
+	"Wraith",
+	"Zombie",
+	"Zombiearm",
+	"BossZombieKnight",
+	"ZombieKnight"
     };
 
  	for (uint i = 0; i < blobNames.length; i++)

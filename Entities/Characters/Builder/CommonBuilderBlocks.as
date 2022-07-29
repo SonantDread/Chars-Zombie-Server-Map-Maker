@@ -267,7 +267,11 @@ void addCommonBuilderBlocks(BuildBlock[][]@ blocks)
 		blocks[1].push_back(b);
 	}
 	{
-		BuildBlock b(0, "superscroll", "$superscroll$", "Random Super Scroll");
+		BuildBlock b(0, "chainsaw", "$chainsaw$", "A Chainsaw");
+		blocks[1].push_back(b);
+	}
+	{
+		BuildBlock b(0, "gaslantern", "$gaslantern$", "Gas Lantern");
 		blocks[1].push_back(b);
 	}
 
@@ -616,6 +620,34 @@ void addCommonBuilderBlocks(BuildBlock[][]@ blocks)
 	blocks.push_back(page_7);	// ZFB
 	{
 		BuildBlock b(0, "ZombiePortal", "$ZombiePortal$", "Zombie Portal");
+		blocks[7].push_back(b);
+	}
+	{
+		BuildBlock b(0, "abomination", "$abomination$", "Abomination");
+		blocks[7].push_back(b);
+	}
+	{
+		BuildBlock b(0, "Skeleton", "$Skeleton$", "Skeleton");
+		blocks[7].push_back(b);
+	}
+	{
+		BuildBlock b(0, "Wraith", "$Wraith$", "Wraith");
+		blocks[7].push_back(b);
+	}
+	{
+		BuildBlock b(0, "Zombie", "$Zombie$", "Zombie");
+		blocks[7].push_back(b);
+	}
+	{
+		BuildBlock b(0, "ZombieArm", "$ZombieArm$", "Zombie Arm");
+		blocks[7].push_back(b);
+	}
+	{
+		BuildBlock b(0, "BossZombieKnight", "$BossZombieKnight$", "BossZombieKnight");
+		blocks[7].push_back(b);
+	}
+	{
+		BuildBlock b(0, "ZombieKnight", "$ZombieKnight$", "ZombieKnight");
 		blocks[7].push_back(b);
 	}
 }

@@ -1,4 +1,5 @@
 v2:
+	added chainsaw, gas lantern and, all zombies (Zaniac)
 	moved zombie portal to a seperate tab called "ZFB" (Zaniac)
 	changed brush to start on the circle one (Zaniac)
 	added the changelog file (Zaniac)

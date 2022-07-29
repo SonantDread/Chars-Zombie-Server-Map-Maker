@@ -593,6 +593,51 @@ class PNGLoader
 			spawnBlob(map, "ZombiePortal", offset, -1, true);
 			offsets[autotile_offset].push_back( offset );
 		}
+		else if (pixel == color_abomination)
+		{
+			spawnBlob(map, "abomination", offset, -1, true);
+			offsets[autotile_offset].push_back( offset );
+		}
+		else if (pixel == color_chainsaw)
+		{
+			spawnBlob(map, "chainsaw", offset, -1, true);
+			offsets[autotile_offset].push_back( offset );
+		}
+		else if (pixel == color_gaslantern)
+		{
+			spawnBlob(map, "gaslantern", offset, -1, true);
+			offsets[autotile_offset].push_back( offset );
+		}
+		else if (pixel == color_Skeleton)
+		{
+			spawnBlob(map, "Skeleton", offset, -1, true);
+			offsets[autotile_offset].push_back( offset );
+		}
+		else if (pixel == color_Wraith)
+		{
+			spawnBlob(map, "Wraith", offset, -1, true);
+			offsets[autotile_offset].push_back( offset );
+		}
+		else if (pixel == color_Zombie)
+		{
+			spawnBlob(map, "Zombie", offset, -1, true);
+			offsets[autotile_offset].push_back( offset );
+		}
+		else if (pixel == color_ZombieArm)
+		{
+			spawnBlob(map, "ZombieArm", offset, -1, true);
+			offsets[autotile_offset].push_back( offset );
+		}
+		else if (pixel == color_BossZombieKnight)
+		{
+			spawnBlob(map, "BossZombieKnight", offset, -1, true);
+			offsets[autotile_offset].push_back( offset );
+		}
+		else if (pixel == color_ZombieKnight)
+		{
+			spawnBlob(map, "ZombieKnight", offset, -1, true);
+			offsets[autotile_offset].push_back( offset );
+		}
 		else if (pixel == color_shark)
 		{
 			spawnBlob(map, "shark", offset, -1, true);
@@ -1569,6 +1614,43 @@ void getInfoFromBlob(CBlob@ this, SColor &out color, Vec2f &out offset)
 		{
 			color = color_ZombiePortal;
 		}
+		else if(name == "abomination")
+		{
+			color = color_abomination;
+		}
+		else if(name == "chainsaw")
+		{
+			color = color_chainsaw;
+		}
+		else if(name == "gaslantern")
+		{
+			color = color_gaslantern;
+		}
+		else if(name == "Skeleton")
+		{
+			color = color_Skeleton;
+		}
+		else if(name == "Wraith")
+		{
+			color = color_Wraith;
+		}
+		else if(name == "Zombie")
+		{
+			color = color_Zombie;
+		}
+		else if(name == "ZombieArm")
+		{
+			color = color_ZombieArm;
+		}
+		else if(name == "BossZombieKnight")
+		{
+			color = color_BossZombieKnight;
+		}
+		else if(name == "ZombieKnight")
+		{
+			color = color_ZombieKnight;
+		}
+
 
 		// below added for map maker mode
 

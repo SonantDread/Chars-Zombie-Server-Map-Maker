@@ -148,7 +148,6 @@ const SColor color_spikes_castle(           0xFFB42A5E); // ARGB(255, 180,  42, 
 const SColor color_spikes_wood(             0xFFC82A5E); // ARGB(255, 200,  42,  94);
 
 // BUILDINGS
-const SColor color_ZombiePortal(             0xff710d71);
 const SColor color_knight_shop(             0xFFFFBEBE); // ARGB(255, 255, 190, 190);
 const SColor color_builder_shop(            0xFFBEFFBE); // ARGB(255, 190, 255, 190);
 const SColor color_archer_shop(             0xFFFFFFBE); // ARGB(255, 255, 255, 190);
@@ -267,3 +266,16 @@ const SColor color_red_team_scroll(0xff880000);
 const SColor color_crappy_scroll(0xff563d56);
 const SColor color_medium_scroll(0xff9a419b);
 const SColor color_super_scroll(0xffcf31d1);
+
+//CharZFB
+
+const SColor color_abomination(0xFF887b7c);
+const SColor color_ZombiePortal(0xff710d71);
+const SColor color_chainsaw(0xFFf6bb2b);
+const SColor color_gaslantern(0xFF89a012);
+const SColor color_Skeleton(0xFFcac19f);
+const SColor color_Wraith(0xFFb588a6);
+const SColor color_Zombie(0xFF46727f);
+const SColor color_ZombieArm(0xFFf84e87);
+const SColor color_BossZombieKnight(0xFF93e078);
+const SColor color_ZombieKnight(0xFFf8e77a);
