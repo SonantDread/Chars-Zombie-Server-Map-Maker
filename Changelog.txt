@@ -1,5 +1,6 @@
 v3:
-	added !generatemap *width height* (Guift)
+	added !generatemap *width height* (Guift, Zaniac)
+	added the ability to change sprite sizes (Guift)
 
 v2:
 	added chainsaw, gas lantern and, all zombies (Zaniac)
