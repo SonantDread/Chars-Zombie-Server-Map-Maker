@@ -270,17 +270,34 @@ void MakeBlocksMenu(CInventory@ this, const Vec2f &in INVENTORY_CE)
 		{
 			BuildBlock@ b = blocks[PAGE][i];
 			if(b is null) continue;
-
-			CGridButton@ button = menu.AddButton(b.icon, "\n" + b.description, Builder::make_block + i);
-			if(button is null) continue;
-
-			button.selectOneOnClick = true;
-
-			CBitStream missing;
-			if(hasRequirements(this, b.reqs, missing))
+			
+			if(b.dimension == Vec2f(-1,-1))
 			{
-				button.hoverText = b.description;
+				CGridButton@ button = menu.AddButton(b.icon, "\n" + b.description, Builder::make_block + i);		
+				if(button is null) continue;
+
+				button.selectOneOnClick = true;
+
+				CBitStream missing;
+				if(hasRequirements(this, b.reqs, missing))
+				{
+					button.hoverText = b.description;
+				}	
 			}
+			else
+			{
+				CGridButton@ button = menu.AddButton(b.icon, "\n" + b.description, Builder::make_block + i, b.dimension);
+				if(button is null) continue;
+
+				button.selectOneOnClick = true;
+
+				CBitStream missing;
+				if(hasRequirements(this, b.reqs, missing))
+				{
+					button.hoverText = b.description;
+				}			
+			}
+
 			//else
 			//{
 			///	button.hoverText = b.description + "\n" + getButtonRequirementsText(missing, true);

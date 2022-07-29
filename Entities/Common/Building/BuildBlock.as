@@ -8,6 +8,7 @@ shared class BuildBlock
 	bool buildOnGround;
 	Vec2f size; // used by buildOnGround blobs
 	bool temporaryBlob;
+	Vec2f dimension;
 
 	BuildBlock() {} // required for handles to work
 
@@ -19,6 +20,17 @@ shared class BuildBlock
 		description = _desc;
 		temporaryBlob = true;
 		buildOnGround = false;
+		dimension = Vec2f(-1,-1);
+	}
+	BuildBlock(TileType _tile, string _name, string _icon, string _desc, Vec2f _forcedDim)
+	{
+		tile = _tile;
+		name = _name;
+		icon = _icon;
+		description = _desc;
+		temporaryBlob = true;
+		buildOnGround = false;
+		dimension = _forcedDim;
 	}
 };
 
