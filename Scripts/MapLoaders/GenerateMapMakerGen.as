@@ -2,12 +2,13 @@
 // fileName is "" on client!
 
 #include "LoaderUtilities.as";
-#include "CustomBlocks.as";
+#include "MinimapHook.as";
 
 bool loadMap(CMap@ _map, const string& in filename)
 {
 	CMap@ map = _map;
 
+	MiniMap::Initialise();
 	if (!getNet().isServer() || filename == "")
 	{
 		SetupMap(map, 0, 0);
@@ -23,28 +24,61 @@ bool loadMap(CMap@ _map, const string& in filename)
 
 	//read in our config stuff -----------------------------
 
-	ConfigFile cfg = ConfigFile(filename);
+	//ConfigFile cfg = ConfigFile(filename);
 
 	//boring vars
-	s32 width = cfg.read_s32("m_width", Maths::Round(m_width*20));
-	s32 height = cfg.read_s32("m_height",Maths::Round(m_height*20));
+	//s32 width = cfg.read_s32("m_width", m_width);
+	s32 width2 = 168 + XORRandom(40);
+	print("width2" + width2);
+	//s32 height = cfg.read_s32("m_height", m_height);
+	s32 height2 = 70 + XORRandom(40);
+	print("height2" + height2);
+	CRules@ ourRule = getRules();
+	int width = ourRule.get_s32("width");
+	int height = ourRule.get_s32("height");
+	print("WE GOT INTO THE GENERATEFROMKAGGEN FUNCTION");
+	if (width == 0 || height == 0)
+	{
+		width = width2;
+		height = height2;
+		print("WIDTH AND HEIGHT SELECTED AT RANDOM");
+	}
 
-	s32 baseline = cfg.read_s32("baseline", 50);
+	print("a " + width);
+	print("b " + height);
+
+	s32 baseline = -500;//cfg.read_s32("baseline", 50);
+	// baseline = 30 + XORRandom(40);
+	print("baseline" + baseline);
 	s32 baseline_tiles = height * (1.0f - (baseline / 100.0f));
-
-	s32 deviation = cfg.read_s32("deviation", 20);
+	s32 deviation = 1;//cfg.read_s32("deviation", 20);
+	// deviation = 3 + XORRandom(50);
+	print("deviation" + deviation);
 
 	//margin for teams
-	s32 map_margin = cfg.read_s32("map_margin", 30);
-	s32 lerp_distance = cfg.read_s32("lerp_distance", 30);
+	s32 map_margin = 0;//cfg.read_s32("map_margin", 30);
+	// map_margin = 20 + XORRandom(30);
+	print("map_margin" + map_margin);
+	s32 lerp_distance = 1;//cfg.read_s32("lerp_distance", 30);
+	// lerp_distance = 20 + XORRandom(45);
+	print("lerp_distance" + lerp_distance);
+
 
 	//erosion
-	s32 erode_cycles = cfg.read_s32("erode_cycles", 10);
+	s32 erode_cycles = 10;//cfg.read_s32("erode_cycles", 10);
+	erode_cycles = XORRandom(10);
+	print("erode_cycles" + erode_cycles);
 
 	//purturbation vars
-	f32 purturb = cfg.read_f32("purturb", 5.0f);
-	f32 purt_scale = cfg.read_f32("purt_scale", 0.0075);
-	f32 purt_width = cfg.read_f32("purt_width", deviation);
+	f32 purturb = 5.0f;//cfg.read_f32("purturb", 5.0f);
+	purturb =  1.0f/(XORRandom(10)+1) + XORRandom(15);
+	print("purturb" + purturb);
+	f32 purt_scale = 0.0075;//cfg.read_f32("purt_scale", 0.0075);
+	purt_scale = 1.0f/(50+XORRandom(5000));
+	print("purt_scale" + purt_scale);
+	f32 purt_width = deviation;//cfg.read_f32("purt_width", deviation);
+	// purt_width = deviation + XORRandom(20);
+	print("purt_width" + purt_width);
 	if (purt_width <= 0)
 		purt_width = deviation;
 
@@ -52,23 +86,40 @@ bool loadMap(CMap@ _map, const string& in filename)
 	Random@ cave_random = Random(map.getMapSeed() ^ 0xff00);
 	Noise@ cave_noise = Noise(cave_random.Next());
 
-	f32 cave_amount = cfg.read_f32("cave_amount", 0.2f);
-	f32 cave_amount_var = cfg.read_f32("cave_amount_var", 0.1f);
+	f32 cave_amount = 0.2f;//cfg.read_f32("cave_amount", 0.2f);
+	cave_amount = 1.0f/(XORRandom(20)+1) + (1.0f/(XORRandom(100)+1))*XORRandom(3);
+	print("cave_amount" + cave_amount);
+	f32 cave_amount_var = 0.1f;//cfg.read_f32("cave_amount_var", 0.1f);
+	cave_amount_var = 1.0f/(XORRandom(20)+1) + (1.0f/(XORRandom(100)+1))*XORRandom(2);
+	print("cave_amount_var" + cave_amount_var);
 	if (cave_amount > 0)
 		cave_amount = Maths::Min(1.0f, Maths::Max(0.0f, cave_amount + cave_amount_var * (cave_random.NextFloat() - 0.5f)));
 
-	f32 cave_scale = cfg.read_f32("cave_scale", 5.0f);
-	cave_scale = 1.0f / Maths::Max(cave_scale, 0.001);
+	f32 cave_scale = 5.0f;//cfg.read_f32("cave_scale", 5.0f);
+	cave_scale = 1.0f / Maths::Max(XORRandom(10)+1, 0.001);
+	print("cave_scale" + cave_scale);
 
-	f32 cave_detail_amp = cfg.read_f32("cave_detail_amp", 0.5f);
-	f32 cave_distort = cfg.read_f32("cave_distort", 2.0f);
-	f32 cave_width = cfg.read_f32("cave_width", 0.5f);
-	f32 cave_lerp = cfg.read_f32("cave_lerp", 10.0f);
+	f32 cave_detail_amp = 0.5f;//cfg.read_f32("cave_detail_amp", 0.5f);
+	cave_detail_amp = 1.0f/(XORRandom(10)+1) + (1.0f/(XORRandom(1000)+1));
+	print("cave_detail_amp" + cave_detail_amp);
+	f32 cave_distort = 2.0f;//cfg.read_f32("cave_distort", 2.0f);
+	cave_distort = 1.0f/(XORRandom(10)+1) + (1.0f/(XORRandom(100)+1))*XORRandom(10);
+	print("cave_distort" + cave_distort);
+	f32 cave_width = 0.5f;//cfg.read_f32("cave_width", 0.5f);
+	cave_width = 1.0f/(XORRandom(100)+1) + 1.0f/(XORRandom(1000)+1)*XORRandom(10);
+	print("cave_width" + cave_width);
+	f32 cave_lerp = 10.0f;//cfg.read_f32("cave_lerp", 10.0f);
+	cave_lerp = 1.0f/(XORRandom(100)+1) + XORRandom(30);
+	print("cave_lerp" + cave_lerp);
 	if (cave_width <= 0)
 		cave_width = 0;
 
-	f32 cave_depth = cfg.read_f32("cave_depth", 20.0f);
-	f32 cave_depth_var = cfg.read_f32("cave_depth_var", 10.0f);
+	f32 cave_depth = 20.0f;//cfg.read_f32("cave_depth", 20.0f);
+	cave_depth = 1.0f/(XORRandom(100)+1) + XORRandom(60);
+	print("cave_depth" + cave_depth);
+	f32 cave_depth_var = 10.0f;//cfg.read_f32("cave_depth_var", 10.0f);
+	cave_depth_var = 1.0f/(XORRandom(100)+1) + XORRandom(40);
+	print("cave_depth_var" + cave_depth_var);
 	cave_depth += cave_depth_var * (cave_random.NextFloat() - 0.5f);
 
 	cave_width *= width; //convert from ratio to tiles
@@ -77,10 +128,18 @@ bool loadMap(CMap@ _map, const string& in filename)
 
 	Random@ ruins_random = Random(map.getMapSeed() ^ 0x8ff000);
 
-	s32 ruins_count = cfg.read_f32("ruins_count", 3);
-	s32 ruins_count_var = cfg.read_f32("ruins_count_var", 2);
-	s32 ruins_size = cfg.read_f32("ruins_size", 10);
-	f32 ruins_width = cfg.read_f32("ruins_width", 0.5f);
+	s32 ruins_count = 3;//cfg.read_f32("ruins_count", 3);
+	ruins_count = XORRandom(10);
+	print("ruins_count" + ruins_count);
+	s32 ruins_count_var = 2;//cfg.read_f32("ruins_count_var", 2);
+	ruins_count_var = XORRandom(10);
+	print("ruins_count_var" + ruins_count_var);
+	s32 ruins_size = 10;//cfg.read_f32("ruins_size", 10);
+	ruins_size = XORRandom(100);
+	print("ruins_size" + ruins_size);
+	f32 ruins_width = 0.5f;//cfg.read_f32("ruins_width", 0.5f);
+	ruins_width = 1.0f/(XORRandom(100)+1) + 1.0f/(XORRandom(1000)+1)*XORRandom(2);
+	print("ruins_width" + ruins_width);
 
 	if (ruins_count > 0)
 	{
@@ -90,11 +149,29 @@ bool loadMap(CMap@ _map, const string& in filename)
 		ruins_width *= width;
 	}
 
+	//water
+
+	s32 water_baseline = 0;//cfg.read_s32("water_baseline", 0);
+	// water_baseline = XORRandom(70);
+	print("water_baseline" + water_baseline);
+	s32 water_baseline_tiles = (1.0f - (water_baseline) / 100.0f) * height;
+
+	//symmetry
+
+	bool mirror_map = false;//cfg.read_bool("mirror_map", false);
+
+	s32 gen_width = width;
+	if (mirror_map) {
+		gen_width = (width + 1) / 2;
+		ruins_count = ruins_count / 2;
+	}
+
 	//done with vars! --------------------------------
 
 	SetupMap(map, width, height);
 
 	//gen heightmap
+	//(generate full width to avoid clamping strangeness)
 	array<int> heightmap(width);
 	for (int x = 0; x < width; ++x)
 	{
@@ -131,20 +208,26 @@ bool loadMap(CMap@ _map, const string& in filename)
 	}
 
 
-	//map margin
+	//smooth map margin
 
 	for (int x = 0; x < map_margin + lerp_distance; ++x)
 	{
 		if (x < map_margin)
 		{
 			heightmap[x] = baseline_tiles;
-			heightmap[width - 1 - x] = baseline_tiles;
+			if(!mirror_map)
+			{
+				heightmap[width - 1 - x] = baseline_tiles;
+			}
 		}
 		else
 		{
 			f32 lerp = Maths::Min(1.0f, (x - map_margin) / f32(lerp_distance));
 			heightmap[x] = baseline_tiles * (1.0f - lerp) + heightmap[x] * lerp;
-			heightmap[width - 1 - x] = baseline_tiles * (1.0f - lerp) + heightmap[width - 1 - x] * lerp;
+			if(!mirror_map)
+			{
+				heightmap[width - 1 - x] = baseline_tiles * (1.0f - lerp) + heightmap[width - 1 - x] * lerp;
+			}
 
 		}
 	}
@@ -155,13 +238,13 @@ bool loadMap(CMap@ _map, const string& in filename)
 	const s32 tree_limit = 2;
 	const s32 bush_limit = 3;
 
-	array<int> naturemap(width);
-	for (int x = 0; x < width; ++x)
+	array<int> naturemap(gen_width);
+	for (int x = 0; x < gen_width; ++x)
 	{
 		naturemap[x] = -1; //no nature
 	}
 
-	for (int x = 0; x < width; ++x)
+	for (int x = 0; x < gen_width; ++x)
 	{
 		f32 overhang = 0;
 		for (int y = 0; y < height; y++)
@@ -213,8 +296,7 @@ bool loadMap(CMap@ _map, const string& in filename)
 
 				if (cave_n > 1.0f - cave_amount)
 				{
-					map.SetTile(offset, CMap::tile_preground_back);
-					map.AddTileFlag( offset, Tile::BACKGROUND | Tile::WATER_PASSES);
+					map.SetTile(offset, CMap::tile_ground_back);
 					add_dirt = false;
 
 					overhang -= _n * 2.0f + 0.5f;
@@ -226,25 +308,21 @@ bool loadMap(CMap@ _map, const string& in filename)
 
 					if (material_frac < 0.7f && n > bedrock_thresh)
 					{
-						map.SetTile(offset, CMap::tile_prebedrock);
-						map.AddTileFlag( offset,  Tile::SOLID | Tile::COLLISION  );
+						map.SetTile(offset, CMap::tile_bedrock);
 					}
 					else if (lerp > 0.5f &&
 					         material_frac > -0.5f && material_frac < -0.25f &&
 					         n_plus < 0.8f)
 					{
-						map.SetTile(offset, CMap::tile_pregold);
-						map.AddTileFlag( offset, Tile::SOLID | Tile::COLLISION  );
+						map.SetTile(offset, CMap::tile_gold);
 					}
 					else if (material_frac > 0.4f && n > 0.9f)
 					{
-						map.SetTile(offset, CMap::tile_prethickstone);
-						map.AddTileFlag( offset,  Tile::SOLID | Tile::COLLISION  );
+						map.SetTile(offset, CMap::tile_thickstone);
 					}
 					else if (material_frac > 0.1f && n_plus > 0.8f)
 					{
-						map.SetTile(offset, CMap::tile_prestone);
-						map.AddTileFlag( offset,  Tile::SOLID | Tile::COLLISION  );
+						map.SetTile(offset, CMap::tile_stone);
 					}
 					else
 					{
@@ -254,8 +332,7 @@ bool loadMap(CMap@ _map, const string& in filename)
 
 				if (add_dirt)
 				{
-					map.SetTile(offset, CMap::tile_preground);
-					map.AddTileFlag( offset, Tile::SOLID | Tile::COLLISION );
+					map.SetTile(offset, CMap::tile_ground);
 					if (overhang == 0 && y > 1)
 					{
 						naturemap[x] = y;
@@ -267,8 +344,7 @@ bool loadMap(CMap@ _map, const string& in filename)
 			else if (overhang > 0.3f)
 			{
 				overhang -= _n * 2.0f + 0.5f;
-				map.SetTile(offset, CMap::tile_preground_back);
-				map.AddTileFlag( offset, Tile::BACKGROUND | Tile::WATER_PASSES);
+				map.SetTile(offset, CMap::tile_ground_back);
 			}
 		}
 	}
@@ -277,11 +353,23 @@ bool loadMap(CMap@ _map, const string& in filename)
 	{
 		int type = ruins_random.NextRanged(3);
 
-		s32 x = (width * 0.5f) + (ruins_random.NextFloat() - 0.5f) * ruins_width;
+		f32 _offset = (ruins_random.NextFloat() - 0.5f);
+		//generate on area to be mirrored
+		if(mirror_map) {
+			_offset = -Maths::Abs(_offset);
+		}
+
+		s32 x = (width * 0.5f) + s32(_offset * ruins_width);
 
 		s32 _size = ruins_size + ruins_random.NextRanged(ruins_size / 2) - ruins_size / 4;
 
 		x -= _size / 2;
+
+		//ensure dont overlap middle
+		if(mirror_map) {
+			x = Maths::Min(x, gen_width - _size);
+		}
+
 		//first pass -get minimum alt
 		s32 floor_height = 0;
 		for (int x_step = 0; x_step < _size; ++x_step)
@@ -364,65 +452,107 @@ bool loadMap(CMap@ _map, const string& in filename)
 				}
 				else
 				{
-					map.SetTile(_upoffset, CMap::tile_preground_back);
-					map.AddTileFlag( offset, Tile::BACKGROUND | Tile::WATER_PASSES | Tile::SOLID );
+					map.SetTile(_upoffset, CMap::tile_ground_back);
 				}
 				_upoffset -= width;
 			}
 		}
 	}
 
-	for (int x = 0; x < width; ++x)
+	//END generating tiles - refining pass
+
+	for (int y = 0; y < height; ++y)
+	{
+		for (int x = 0; x < gen_width; ++x)
+		{
+			u32 offset = (x) + (y * width);
+			u32 mirror_offset = (width - 1 - x) + (y * width);
+			TileType t = map.getTile(offset).type;
+			//(so now we actually mirror the tiles)
+			if(mirror_map)
+			{
+				map.SetTile(mirror_offset, t);
+			}
+
+			//and write in water if needed
+			if(!map.isTileSolid(t) && y > water_baseline_tiles)
+			{
+				map.server_setFloodWaterOffset(offset, true);
+				if(mirror_map)
+				{
+					map.server_setFloodWaterOffset(mirror_offset, true);
+				}
+			}
+		}
+	}
+
+
+	//START generating blobs
+	for (int x = 0; x < gen_width; ++x)
 	{
 		if (naturemap[x] == -1)
 			continue;
 
+
 		int y = naturemap[x];
+
+		//underwater?
+		if(y > water_baseline_tiles)
+			continue;
 
 		f32 edge_dist = Maths::Max(Maths::Min(x - map_margin, width - x - map_margin), 0);
 		f32 lerp = Maths::Min(1.0f, edge_dist / f32(lerp_distance));
 
 		u32 offset = x + y * width;
+		u32 mirror_offset = (width - 1 - x) + y * width;
 
 		bool force_tree = (x == map_margin - 2 || width - x == map_margin - 2);
 
 		f32 grass_frac = material_noise.Fractal(x * 0.02f, y * 0.02f) + ((1.0f - lerp) * 0.5f);
 		if (force_tree || grass_frac > 0.5f)
 		{
-			map.SetTile(offset - width, CMap::tile_grass + map_random.NextRanged(4));  //todo grass random
-
+			bool spawned = false;
 			//generate vegetation
 			if (force_tree ||
 			        (x > map_margin && width - x > map_margin) && (x % 7 == 0 || x % 23 == 3))
 			{
 				f32 _g = map_random.NextFloat();
 
-				Vec2f pos = (Vec2f(x, y - 1) * map.tilesize) +
-				            Vec2f(4.0f, 4.0f);
+				Vec2f pos = (Vec2f(x, y - 1) * map.tilesize) + Vec2f(4.0f, 4.0f);
+				Vec2f mirror_pos = (Vec2f(width - 1 - x, y - 1) * map.tilesize) + Vec2f(4.0f, 4.0f);
 
 				if (tree_skip < tree_limit &&
 				        (!force_tree && _g > 0.5f || bush_skip > bush_limit))  //bush
 				{
 					bush_skip = 0;
-					server_CreateBlob("bush", -1, pos);
 					tree_skip++;
+
+					SpawnBush(map, pos);
+					if(mirror_map) {
+						SpawnBush(map, mirror_pos);
+					}
+
+					spawned = true;
 				}
 				else if (tree_skip >= tree_limit || force_tree || _g > 0.25f)  //tree
 				{
 					tree_skip = 0;
-					CBlob@ tree = server_CreateBlobNoInit("mmtree");
-					if (tree !is null)
-					{
-						//tree.Tag("startbig");
-						tree.setPosition(pos);
-						tree.Init();
-						tree.getShape().SetStatic( true );
-
-						if (map.getTile(offset).type == CMap::tile_empty)
-							map.SetTile(offset, CMap::tile_grass + map_random.NextRanged(3));
-					}
 					bush_skip++;
+
+					SpawnTree(map, pos, y < baseline_tiles);
+					if(mirror_map) {
+						SpawnTree(map, mirror_pos, y < baseline_tiles);
+					}
+
+					spawned = true;
 				}
+			}
+
+			//todo grass control random
+			TileType grass_tile = CMap::tile_grass + (spawned ? 0 : map_random.NextRanged(4));
+			map.SetTile(offset - width, grass_tile);
+			if(mirror_map) {
+				map.SetTile(mirror_offset - width, grass_tile);
 			}
 		}
 	}
@@ -431,6 +561,43 @@ bool loadMap(CMap@ _map, const string& in filename)
 	return true;
 }
 
+//spawn functions
+CBlob@ SpawnBush(CMap@ map, Vec2f pos)
+{
+	return server_CreateBlob("bush", -1, pos);
+}
+
+CBlob@ SpawnTree(CMap@ map, Vec2f pos, bool high_altitude)
+{
+	CBlob@ tree = server_CreateBlobNoInit(high_altitude ? "tree_pine" : "tree_bushy");
+	if (tree !is null)
+	{
+		tree.Tag("startbig");
+		tree.setPosition(pos);
+		tree.Init();
+	}
+	return tree;
+}
+
+void SpawnFlag(CMap@ map, Vec2f pos, int teamNum)
+{
+	switch(teamNum)
+	{
+		case 1: map.AddMarker(pos, "blue spawn"); break;
+		case 2: map.AddMarker(pos, "red spawn");  break;
+		default: break;
+	}
+}
+
+void SpawnTent(CMap@ map, Vec2f pos, int teamNum)
+{
+	switch(teamNum)
+	{
+		case 1: map.AddMarker(pos, "blue main spawn"); break;
+		case 2: map.AddMarker(pos, "red main spawn");  break;
+		default: break;
+	}
+}
 
 void SetupMap(CMap@ map, int width, int height)
 {

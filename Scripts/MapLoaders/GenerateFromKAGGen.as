@@ -37,28 +37,30 @@ bool loadMap(CMap@ _map, const string& in filename)
 	int width = ourRule.get_s32("width");
 	int height = ourRule.get_s32("height");
 	print("WE GOT INTO THE GENERATEFROMKAGGEN FUNCTION");
-	if (width == 0 || height == 0) // this needs to be fixed does it tho ?
+	if (width == 0 || height == 0)
 	{
 		width = width2;
 		height = height2;
 		print("WIDTH AND HEIGHT SELECTED AT RANDOM");
-	} 
+	}
 
+	print("a " + width);
+	print("b " + height);
 
-	s32 baseline = 50;//cfg.read_s32("baseline", 50);
-	baseline = 30 + XORRandom(40);
+	s32 baseline = -500;//cfg.read_s32("baseline", 50);
+	// baseline = 30 + XORRandom(40);
 	print("baseline" + baseline);
 	s32 baseline_tiles = height * (1.0f - (baseline / 100.0f));
-	s32 deviation = 20;//cfg.read_s32("deviation", 20);
-	deviation = 3 + XORRandom(50);
+	s32 deviation = 1;//cfg.read_s32("deviation", 20);
+	// deviation = 3 + XORRandom(50);
 	print("deviation" + deviation);
 
 	//margin for teams
-	s32 map_margin = 30;//cfg.read_s32("map_margin", 30);
-	map_margin = 20 + XORRandom(30);
+	s32 map_margin = 0;//cfg.read_s32("map_margin", 30);
+	// map_margin = 20 + XORRandom(30);
 	print("map_margin" + map_margin);
-	s32 lerp_distance = 30;//cfg.read_s32("lerp_distance", 30);
-	lerp_distance = 20 + XORRandom(45);
+	s32 lerp_distance = 1;//cfg.read_s32("lerp_distance", 30);
+	// lerp_distance = 20 + XORRandom(45);
 	print("lerp_distance" + lerp_distance);
 
 
@@ -75,7 +77,7 @@ bool loadMap(CMap@ _map, const string& in filename)
 	purt_scale = 1.0f/(50+XORRandom(5000));
 	print("purt_scale" + purt_scale);
 	f32 purt_width = deviation;//cfg.read_f32("purt_width", deviation);
-	purt_width = deviation + XORRandom(20);
+	// purt_width = deviation + XORRandom(20);
 	print("purt_width" + purt_width);
 	if (purt_width <= 0)
 		purt_width = deviation;
@@ -150,7 +152,7 @@ bool loadMap(CMap@ _map, const string& in filename)
 	//water
 
 	s32 water_baseline = 0;//cfg.read_s32("water_baseline", 0);
-	water_baseline = XORRandom(70);
+	// water_baseline = XORRandom(70);
 	print("water_baseline" + water_baseline);
 	s32 water_baseline_tiles = (1.0f - (water_baseline) / 100.0f) * height;
 

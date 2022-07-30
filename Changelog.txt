@@ -1,3 +1,7 @@
+v4:
+	hopefully fixed map generation (Zaniac)
+	maps should generate as blank now (Zaniac)
+
 v3:
 	added !generatemap *width height* (Guift, Zaniac)
 	added the ability to change sprite sizes (Guift)
