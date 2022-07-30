@@ -323,7 +323,7 @@ bool onServerProcessChat(CRules@ this, const string& in text_in, string& out tex
 					myrule.set_s32("width", width);
 					myrule.set_s32("height", height);
 					//we need to call the global function LoadMap engine side, less go
-					if(isServer())
+					if(getNet().isServer())
 					{
 						LoadMap("Maps/test.kaggen.cfg");
 						print("i am a server");
