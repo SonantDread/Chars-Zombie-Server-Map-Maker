@@ -1,3 +1,9 @@
+v6:
+	added !generatenature
+	added !removenature
+	added !generateore
+	zombie portals & ores will now show at the top
+
 v5:
 	added map statistics based on the currently hosted mod (Zaniac)
 	fixed map making generation to generate blank maps & let you go under 80x80 map size without crashing (Zaniac)

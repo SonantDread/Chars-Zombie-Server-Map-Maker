@@ -25,6 +25,87 @@ void onInit(CRules@ this)
 	this.addCommandID("SendChatMessage");
 }
 
+void PlaceGrass(Vec2f pos){
+	int whichgrass = XORRandom(4);
+	if (whichgrass == 4-1){ //grass type one
+		getMap().server_SetTile(pos, 25);
+	}
+	else if (whichgrass == 3-1){ //grass type two
+		getMap().server_SetTile(pos, 26);
+	}
+	else if (whichgrass == 2-1){ //grass type three
+		getMap().server_SetTile(pos, 27);
+	}
+	else if (whichgrass == 1-1){ //grass type four
+		getMap().server_SetTile(pos, 28);
+	}
+}
+
+void PlaceNature(uint16 tileType, Vec2f pos)
+{
+	CMap@ map = getMap();
+	//reference basepngloader.as for tiles
+    if (tileType == 16){ //search for dirt
+        Vec2f pos2;
+        pos2.x = pos.x;
+        pos2.y = pos.y-8.0f;
+		int random = XORRandom(10); //10 so these can be percents
+		if (random < 9-1){ //grass
+			if(map.getTile(pos2).type == 0){ //search for air
+				PlaceGrass(pos2);
+            	// map.server_SetTile(pos2, 25); //set tile to grass
+        	}
+		}
+
+		else if (random == 9-1){ //trees
+			int whichtree = XORRandom(2); //which tree should we generate?
+			if (whichtree == 2-1){ // pine tree
+				float pos3 = pos2.y;
+				//we are already one block up
+				//can the tree fully grow here?
+				if (map.getTile(Vec2f(pos.x, pos3)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*1.0f)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*2.0f)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*3.0f)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*4.0f)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*5.0f)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*6.0f)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*7.0f)).type == 0){
+					// CBlob@ tree = server_CreateBlob("tree_pine", -1, pos2);
+					CBlob@ tree = server_CreateBlobNoInit("tree_pine");
+					if(tree !is null){ //let us instant grow the tree
+						tree.Tag("startbig");
+						tree.setPosition(pos2);
+						tree.Init();
+					}
+				}
+				else{
+					if(map.getTile(pos2).type == 0){
+						PlaceGrass(pos2); //set tile to grass if we cannot grow a tree
+					}
+				}
+			}
+			else if (whichtree == 1-1){ //bushy tree
+				float pos3 = pos2.y;
+				//we are already one block up
+				//can the tree fully grow here?
+				if (map.getTile(Vec2f(pos.x, pos3)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*1.0f)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*2.0f)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*3.0f)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*4.0f)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*5.0f)).type == 0){
+					CBlob@ tree = server_CreateBlobNoInit("tree_bushy");
+					if(tree !is null){ //let us instant grow the tree
+						tree.Tag("startbig");
+						tree.setPosition(pos2);
+						tree.Init();
+					}
+				}
+				else{
+					if(map.getTile(pos2).type == 0){
+						PlaceGrass(pos2); //set tile to grass if we cannot grow a tree
+					}
+				}
+			}
+		}
+
+		else if (random == 10-1){ //flower
+			if(map.getTile(pos2).type == 0){
+				server_CreateBlob("flowers",-1,pos2);
+			}
+		}
+    }
+}
+
 bool onServerProcessChat(CRules@ this, const string& in text_in, string& out text_out, CPlayer@ player)
 {
 	//--------MAKING CUSTOM COMMANDS-------//
@@ -117,6 +198,65 @@ bool onServerProcessChat(CRules@ this, const string& in text_in, string& out tex
 		{
 			this.SetCurrentState(GAME);
 			return true;
+		}
+		else if (text_in == "!placenature" || text_in == "!pn" || text_in == "!generatenature" || text_in == "!gn"){
+            CMap@ map = getMap(); //loop through entire map
+            for(int y = 0; y < map.tilemapheight; ++y){
+                for(int x = 0; x < map.tilemapwidth; ++x){
+                    Vec2f pos = Vec2f(x,y)*8.0f;
+                    PlaceNature(map.getTile(pos).type,pos);
+                }
+            }
+        }
+		else if (text_in == "!removenature"){
+            for(int y = 0; y < getMap().tilemapheight; ++y){
+                for(int x = 0; x < getMap().tilemapwidth; ++x){
+					Vec2f pos = Vec2f(x,y)*8.0f;
+					if(getMap().getTile(pos).type == 25 || getMap().getTile(pos).type == 26 || getMap().getTile(pos).type == 27 || getMap().getTile(pos).type == 28){ //remove grass
+						getMap().server_SetTile(pos,0);
+					}
+					CBlob@[] blobs;
+					if (getBlobsByName("tree_pine", @blobs)){
+						for (int i = 0; i < blobs.length; i++) {
+							blobs[i].server_Die();
+						}
+					}
+					if (getBlobsByName("tree_bushy", @blobs)){
+						for (int i = 0; i < blobs.length; i++) {
+							blobs[i].server_Die();
+						}
+					}
+					if (getBlobsByName("flowers", @blobs)){
+						for (int i = 0; i < blobs.length; i++) {
+							blobs[i].server_Die();
+						}
+					}
+					// no cleanup required for logs & seeds due to cfg not including their creation file
+				}
+			}
+		}
+		else if (text_in == "!generateore"){
+            for(int y = 0; y < getMap().tilemapheight; ++y){
+                for(int x = 0; x < getMap().tilemapwidth; ++x){
+					Vec2f pos = Vec2f(x,y)*8.0f;
+					//all the ore values, including dirt.
+					if(getMap().getTile(pos).type == 16 || getMap().getTile(pos).type == 17 || getMap().getTile(pos).type == 18 || getMap().getTile(pos).type == 19 || getMap().getTile(pos).type == 20 || getMap().getTile(pos).type == 21 || getMap().getTile(pos).type == 22 || getMap().getTile(pos).type == 23 || getMap().getTile(pos).type == 24 || getMap().getTile(pos).type == 29 || getMap().getTile(pos).type == 30 || getMap().getTile(pos).type == 31 || getMap().getTile(pos).type == 80 || getMap().getTile(pos).type == 81 || getMap().getTile(pos).type == 81 || getMap().getTile(pos).type == 82 || getMap().getTile(pos).type == 83 || getMap().getTile(pos).type == 84 || getMap().getTile(pos).type == 85 || getMap().getTile(pos).type == 90 || getMap().getTile(pos).type == 91 || getMap().getTile(pos).type == 92 || getMap().getTile(pos).type == 93 || getMap().getTile(pos).type == 94 || getMap().getTile(pos).type == 96 || getMap().getTile(pos).type == 97 || getMap().getTile(pos).type == 100 || getMap().getTile(pos).type == 101 || getMap().getTile(pos).type == 102 || getMap().getTile(pos).type == 103 || getMap().getTile(pos).type == 104 || getMap().getTile(pos).type == 208 || getMap().getTile(pos).type == 209 || getMap().getTile(pos).type == 214 || getMap().getTile(pos).type == 215 || getMap().getTile(pos).type == 216 || getMap().getTile(pos).type == 217 || getMap().getTile(pos).type == 218){ //only run if it is an ore or dirt
+						int whatore = XORRandom(30); //change this higher to have more dirt
+						if(whatore > 10-1){
+							getMap().server_SetTile(pos, 16); //dirt
+						}
+						else if (whatore == 9-1 || whatore == 8-1 || whatore == 7-1){
+							getMap().server_SetTile(pos, 80); //gold
+						}
+						else if (whatore == 6-1 || whatore == 5-1 || whatore == 4-1){
+							getMap().server_SetTile(pos, 96); //stone
+						}
+						else if (whatore == 3-1 || whatore == 2-1 || whatore == 1-1){
+							getMap().server_SetTile(pos, 208); //thick stone
+						}
+					}
+				}
+			}
 		}
 	}
 
