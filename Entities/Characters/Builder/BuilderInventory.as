@@ -684,7 +684,7 @@ void onCommand(CInventory@ this, u8 cmd, CBitStream@ params)
 			bs--;
 			target.set_u8("brushsize", bs);
 
-		if(cmd == 51 && bs < 14)
+		if(cmd == 51 && bs < 30)
 			bs++;
 			target.set_u8("brushsize", bs);
 

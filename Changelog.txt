@@ -1,3 +1,7 @@
+v5:
+	added map statistics based on the currently hosted mod (Zaniac)
+	fixed map making generation to generate blank maps & let you go under 80x80 map size without crashing (Zaniac)
+
 v4:
 	hopefully fixed map generation (Zaniac)
 	maps should generate as blank now (Zaniac)

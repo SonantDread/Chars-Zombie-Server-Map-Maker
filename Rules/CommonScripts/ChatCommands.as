@@ -312,7 +312,7 @@ bool onServerProcessChat(CRules@ this, const string& in text_in, string& out tex
 					int money = parseInt(tokens[1]);
 					player.server_setCoins(money);
 				}
-				else if(tokens[0] == "!generatemap")
+				else if(tokens[0] == "!generatemap" || tokens[0] == "!gm")
 				{
 					CRules@ myrule = getRules();
 					//the laws of reality are ours
@@ -330,7 +330,9 @@ bool onServerProcessChat(CRules@ this, const string& in text_in, string& out tex
 					}
 					else{
 					}
-					//loadMap(map, "here because we did a hacky thing instead of a good thing");
+					
+					text_out = "";
+					return false;
 				}
 			}
 			else
