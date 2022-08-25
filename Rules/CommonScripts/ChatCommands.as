@@ -25,6 +25,165 @@ void onInit(CRules@ this)
 	this.addCommandID("SendChatMessage");
 }
 
+//bedrock generation
+void GenerateBedrock(){
+    for(int x = 0; x < getMap().tilemapwidth; ++x){
+		float height = getMap().tilemapheight;
+		PlaceBlocks(Vec2f(x*8.0f,height*8.0f+8.0f), "up", 10, 106);
+	} //place 10 rows of bedrock at the bottom of the map
+	float width = getMap().tilemapwidth*8.0f;
+	int random3 = XORRandom(5);
+	for(int x = 0; x < getMap().tilemapwidth; x++){
+		int random = XORRandom(8); //how far down do we go?
+		int random2 = XORRandom(5); //how far do we place the blocks?
+		for(int i = 0; i < random2; i++){
+			PlaceBlocks(Vec2f(x*8.0f+i*8.0f,getMap().tilemapheight*8.0f-80.0f), "down", random, 0);
+		}
+	}
+    for(int y = 0; y < getMap().tilemapheight; ++y){ //smooth to the right
+        for(int x = 0; x < getMap().tilemapwidth; ++x){
+			if(getMap().getTile(Vec2f(x*8.0f,y*8.0f)).type == 106){
+				if(CheckBlocks(Vec2f(x*8.0f+8.0f,y*8.0f), "down", 2, false) == true){ //check right
+					continue; //assume we hit bedrock
+				}
+				else{ //no bedrock
+					if(CheckBlocks(Vec2f(x*8.0f+16.0f,y*8.0f), "down", 2, false) == true){ //do we hit bedrock?
+						PlaceBlocks(Vec2f(x*8.0f+8.0f,y*8.0f), "down", 4, 106); //is there more bedrock to the side of it?
+					}
+					else{ //no bedrock nearby
+						PlaceBlocks(Vec2f(x*8.0f+8.0f,y*8.0f), "down", 4, 106); //place two bedrock down
+					}
+				}
+			}
+		}
+	}
+    for(int y = 0; y < getMap().tilemapheight; ++y){ //smooth to the left
+        for(int x = 0; x < getMap().tilemapwidth; ++x){
+			if(getMap().getTile(Vec2f(x*8.0f,y*8.0f)).type == 106){
+				if(CheckBlocks(Vec2f(x*8.0f-8.0f,y*8.0f), "down", 1, false) == true){ //check left
+					continue; //assume we hit bedrock
+				}
+				else{ //no bedrock
+					if(CheckBlocks(Vec2f(x*8.0f-16.0f,y*8.0f), "down", 2, false) == true){ //do we hit bedrock?
+						PlaceBlocks(Vec2f(x*8.0f-8.0f,y*8.0f), "down", 4, 106); //is there more bedrock to the side of it?
+					}
+					else{ //no bedrock nearby
+						PlaceBlocks(Vec2f(x*8.0f-8.0f,y*8.0f), "down", 4, 106); //place two bedrock down
+					}
+				}
+			}
+		}
+	}
+    for(int y = 0; y < getMap().tilemapheight; ++y){ //fix random holes
+        for(int x = 0; x < getMap().tilemapwidth; ++x){
+			if(getMap().getTile(Vec2f(x*8.0f,y*8.0f)).type == 106){ //is this bedrock?
+				if(getMap().getTile(Vec2f(x*8.0f,y*8.0f+8.0f)).type == 0){ //is this air?
+					PlaceBlocks(Vec2f(x*8.0f,y*8.0f), "down", 5, 106); //place a pillar down
+				}
+			}
+		}
+	}
+}
+
+//returns true if it is an ore
+bool IsOre(Vec2f pos){ //is this ore?
+	int a = getMap().getTile(pos).type;
+	if(a == 80 || a == 81 || a == 81 || a == 82 || a == 83 || a == 84 || a == 85 || a == 90 || a == 91 || a == 92 || a == 93 || a == 94 || a == 96 || a == 97 || a == 100 || a == 101 || a == 102 || a == 103 || a == 104 || a == 208 || a == 209 || a == 214 || a == 215 || a == 216 || a == 217 || a == 218){
+		print(""+a);
+		return true;
+	}
+	else{
+		return false;
+	}
+}
+
+//start position
+//what radius are we checking?
+bool CheckOres(Vec2f pos,uint radius){ //this will check if there is at least one ore in a radius * radius square area
+	for(int x = 0; x < radius+1; x++){ //+1 because we also check the ore in the center
+		for(int y = 0; y < radius+1; y++){
+			if(IsOre(Vec2f(pos.x+x*8.0f,pos.y+y*8.0f))){
+				return true; //ore is found
+			}
+		}
+	}
+	return false;
+}
+
+//start position
+//which direction should we check in
+//how many tiles are we checking?
+//do we interact with blobs?
+bool CheckBlocks(Vec2f pos, string direction,int howfar,bool interact){
+	if(interact == true){ //we interact with blobs
+		if(direction == "left"){ //check left
+			float end = pos.x-(howfar*8.0f);
+			return getMap().rayCastSolid(pos, Vec2f(end,pos.y)); //is there tiles here?
+		}
+		else if(direction == "right"){ //check right
+			float end = pos.x+(howfar*8.0f);
+			return getMap().rayCastSolid(pos, Vec2f(end,pos.y)); //is there tiles here?
+		}
+		else if(direction == "up"){ //check up
+			float end = pos.y-(howfar*8.0f);
+			return getMap().rayCastSolid(pos, Vec2f(pos.x,end)); //is there tiles here?
+		}
+		else{ 
+			float end = pos.y+(howfar*8.0f);
+			return getMap().rayCastSolid(pos, Vec2f(pos.x,end)); //is there tiles here?
+		}
+	}
+	else{ //we do not interact with blobs
+		if(direction == "left"){ //check left
+			float end = pos.x-(howfar*8.0f);
+			return getMap().rayCastSolidNoBlobs(pos, Vec2f(end,pos.y)); //is there tiles here?
+		}
+		else if(direction == "right"){ //check right
+			float end = pos.x+(howfar*8.0f);
+			return getMap().rayCastSolidNoBlobs(pos, Vec2f(end,pos.y)); //is there tiles here?
+		}
+		else if(direction == "up"){ //check up
+			float end = pos.y-(howfar*8.0f);
+			return getMap().rayCastSolidNoBlobs(pos, Vec2f(pos.x,end)); //is there tiles here?
+		}
+		else{ 
+			float end = pos.y+(howfar*8.0f);
+			return getMap().rayCastSolidNoBlobs(pos, Vec2f(pos.x,end)); //is there tiles here?
+		}
+	}
+}
+
+//start position
+//which direction should we check in
+//how many tiles are we checking?
+//what block are we placing?
+void PlaceBlocks(Vec2f pos, string direction,int howfar, int block){
+	if(direction == "left"){ //place left
+		for (int i = 0; i < howfar; i++){
+			float end = pos.x-(howfar+i*8.0f);
+			getMap().server_SetTile(Vec2f(end,pos.y), block);
+		}
+	}
+	if(direction == "right"){ //place right
+		for (int i = 0; i < howfar; i++){
+			float end = pos.x+(howfar+i*8.0f);
+			getMap().server_SetTile(Vec2f(end,pos.y), block);
+		}
+	}
+	if(direction == "up"){ //place up
+		for (int i = 0; i < howfar; i++){
+			float end = pos.y-(howfar+i*8.0f);
+			getMap().server_SetTile(Vec2f(pos.x,end), block);
+		}
+	}
+	if(direction == "down"){ //place down
+		for (int i = 0; i < howfar; i++){
+			float end = pos.y+(howfar+i*8.0f);
+			getMap().server_SetTile(Vec2f(pos.x,end), block);
+		}
+	}
+}
+
 void PlaceGrass(Vec2f pos){
 	int whichgrass = XORRandom(4);
 	if (whichgrass == 4-1){ //grass type one
@@ -50,10 +209,9 @@ void PlaceNature(uint16 tileType, Vec2f pos)
         pos2.x = pos.x;
         pos2.y = pos.y-8.0f;
 		int random = XORRandom(10); //10 so these can be percents
-		if (random < 9-1){ //grass
+		if (random < 8-1){ //grass
 			if(map.getTile(pos2).type == 0){ //search for air
-				PlaceGrass(pos2);
-            	// map.server_SetTile(pos2, 25); //set tile to grass
+				PlaceGrass(pos2); //set tile to grass
         	}
 		}
 
@@ -63,7 +221,7 @@ void PlaceNature(uint16 tileType, Vec2f pos)
 				float pos3 = pos2.y;
 				//we are already one block up
 				//can the tree fully grow here?
-				if (map.getTile(Vec2f(pos.x, pos3)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*1.0f)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*2.0f)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*3.0f)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*4.0f)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*5.0f)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*6.0f)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*7.0f)).type == 0){
+				if(CheckBlocks(pos2,"up",8,true) == false){ //if there is no blocks, place the tree
 					// CBlob@ tree = server_CreateBlob("tree_pine", -1, pos2);
 					CBlob@ tree = server_CreateBlobNoInit("tree_pine");
 					if(tree !is null){ //let us instant grow the tree
@@ -82,7 +240,7 @@ void PlaceNature(uint16 tileType, Vec2f pos)
 				float pos3 = pos2.y;
 				//we are already one block up
 				//can the tree fully grow here?
-				if (map.getTile(Vec2f(pos.x, pos3)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*1.0f)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*2.0f)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*3.0f)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*4.0f)).type == 0 && map.getTile(Vec2f(pos.x, pos3-8.0f*5.0f)).type == 0){
+				if(CheckBlocks(pos2,"up",6,true) == false){
 					CBlob@ tree = server_CreateBlobNoInit("tree_bushy");
 					if(tree !is null){ //let us instant grow the tree
 						tree.Tag("startbig");
@@ -104,6 +262,70 @@ void PlaceNature(uint16 tileType, Vec2f pos)
 			}
 		}
     }
+}
+
+void PlaceDirt(){
+	CMap@ map = getMap(); //get map for later use
+
+    //for(int y = 0; y < getMap().tilemapheight; y++){
+		int nb_of_mountains = 4;
+		float amplitude = 1.5f; // between 0.5 and 2 is prob good
+		float roughness_attenuation = 0.1f; //here, higher mean less scuffed, between 0.5 and 1 is prob good
+		nb_of_mountains = XORRandom(5)+1;//0.25f+(1/(XORRandom(30)+1))*(5.0f - 0.25f);
+		amplitude = 0.30f+(1/float(XORRandom(10000)+1))*(1.5f - 0.50f);
+		roughness_attenuation = (1/float(XORRandom(100)+1))*(0.5f);
+		bool onlyPositive = false;
+		if(XORRandom(100) < 25){
+			onlyPositive = true;
+		}
+    	for(int x = 0; x < map.tilemapwidth; x++){
+			float baseline_height = map.tilemapheight*amplitude*Maths::Sin(2*Maths::Pi*x*8/(map.tilemapwidth*8));
+			float baseline_height_2 = map.tilemapheight*amplitude*Maths::Sin(float(nb_of_mountains)*2*Maths::Pi*x*8/(map.tilemapwidth*8));
+			float roughness_baseline = map.tilemapheight*amplitude*roughness_attenuation*Maths::Sin(60*2*Maths::Pi*x*8/(map.tilemapwidth*8));
+			float final_sine = baseline_height_2+baseline_height+roughness_baseline;
+			if (onlyPositive){
+				final_sine = Maths::Abs(baseline_height_2)+Maths::Abs(baseline_height)+roughness_baseline;
+			}
+			//map.server_SetTile(Vec2f((x*8.0f)*(place*5.0f)*2.0f,baseline*8.0f+32.0f), 106); 
+			map.server_SetTile(Vec2f(x*8,getMap().tilemapheight*4.0f-final_sine),16); 
+		}
+	//}
+	//fix for being very holey
+    for(int y = 0; y < getMap().tilemapheight; y++){
+    	for(int x = 0; x < getMap().tilemapwidth; x++){
+			Vec2f pos = Vec2f(x*8.0f,y*8.0f);
+			if(map.getTile(pos).type == 16){
+				if(map.getTile(Vec2f(x*8.0f,y*8.0f+8.0f)).type == 0){
+					map.server_SetTile(Vec2f(x*8.0f,y*8.0f+8.0f), 16);// PlaceBlocks(Vec2f(x*8.0f,y*8.0f-88.0f), "down", 100, 16);
+				}
+			}
+		}
+	}
+}
+
+void OreChunk(){ //todo: generate something that these will replace
+    for(int y = 0; y < getMap().tilemapheight; y++){
+        for(int x = 0; x < getMap().tilemapwidth; x++){ //loop through the map
+			if(getMap().getTile(Vec2f(x*8.0f,y*8.0f)).type == 16){
+				if(CheckOres(Vec2f(x*8.0f,y*8.0f),2) == true){
+					Vec2f pos = Vec2f(x*8.0f, y*8.0f);
+					int whatore = XORRandom(12); //what ore are we placing?
+					if(whatore > 9-1){
+						getMap().server_SetTile(pos, 16); //dirt
+					}
+					if (whatore == 8-1){
+						getMap().server_SetTile(pos, 80); //gold
+					}
+					else if (whatore == 7-1 || whatore == 6-1 || whatore == 5-1 || whatore == 4-1 || whatore == 3-1){
+						getMap().server_SetTile(pos, 96); //stone
+					}
+					else if (whatore == 2-1 || whatore == 1-1){
+						getMap().server_SetTile(pos, 208); //thick stone
+					}
+				}
+			}
+		}
+	}
 }
 
 bool onServerProcessChat(CRules@ this, const string& in text_in, string& out text_out, CPlayer@ player)
@@ -199,6 +421,15 @@ bool onServerProcessChat(CRules@ this, const string& in text_in, string& out tex
 			this.SetCurrentState(GAME);
 			return true;
 		}
+		else if (text_in == "!drain"){ //removes all water
+			print("hello");
+            for(int y = 0; y < getMap().tilemapheight; ++y){
+                for(int x = 0; x < getMap().tilemapwidth; ++x){
+					getMap().server_setFloodWaterWorldspace(Vec2f(x*8.0f,y*8.0f), false);
+				}
+			}
+			return true;
+		}
 		else if (text_in == "!placenature" || text_in == "!pn" || text_in == "!generatenature" || text_in == "!gn"){
             CMap@ map = getMap(); //loop through entire map
             for(int y = 0; y < map.tilemapheight; ++y){
@@ -207,6 +438,7 @@ bool onServerProcessChat(CRules@ this, const string& in text_in, string& out tex
                     PlaceNature(map.getTile(pos).type,pos);
                 }
             }
+			return true;
         }
 		else if (text_in == "!removenature"){
             for(int y = 0; y < getMap().tilemapheight; ++y){
@@ -234,18 +466,19 @@ bool onServerProcessChat(CRules@ this, const string& in text_in, string& out tex
 					// no cleanup required for logs & seeds due to cfg not including their creation file
 				}
 			}
+			return true;
 		}
-		else if (text_in == "!generateore"){
+		else if (text_in == "!generateoreold"){ //todo: make the ratio value configurable
             for(int y = 0; y < getMap().tilemapheight; ++y){
                 for(int x = 0; x < getMap().tilemapwidth; ++x){
 					Vec2f pos = Vec2f(x,y)*8.0f;
 					//all the ore values, including dirt.
 					if(getMap().getTile(pos).type == 16 || getMap().getTile(pos).type == 17 || getMap().getTile(pos).type == 18 || getMap().getTile(pos).type == 19 || getMap().getTile(pos).type == 20 || getMap().getTile(pos).type == 21 || getMap().getTile(pos).type == 22 || getMap().getTile(pos).type == 23 || getMap().getTile(pos).type == 24 || getMap().getTile(pos).type == 29 || getMap().getTile(pos).type == 30 || getMap().getTile(pos).type == 31 || getMap().getTile(pos).type == 80 || getMap().getTile(pos).type == 81 || getMap().getTile(pos).type == 81 || getMap().getTile(pos).type == 82 || getMap().getTile(pos).type == 83 || getMap().getTile(pos).type == 84 || getMap().getTile(pos).type == 85 || getMap().getTile(pos).type == 90 || getMap().getTile(pos).type == 91 || getMap().getTile(pos).type == 92 || getMap().getTile(pos).type == 93 || getMap().getTile(pos).type == 94 || getMap().getTile(pos).type == 96 || getMap().getTile(pos).type == 97 || getMap().getTile(pos).type == 100 || getMap().getTile(pos).type == 101 || getMap().getTile(pos).type == 102 || getMap().getTile(pos).type == 103 || getMap().getTile(pos).type == 104 || getMap().getTile(pos).type == 208 || getMap().getTile(pos).type == 209 || getMap().getTile(pos).type == 214 || getMap().getTile(pos).type == 215 || getMap().getTile(pos).type == 216 || getMap().getTile(pos).type == 217 || getMap().getTile(pos).type == 218){ //only run if it is an ore or dirt
-						int whatore = XORRandom(30); //change this higher to have more dirt
-						if(whatore > 10-1){
+						int whatore = XORRandom(29); //change this higher to have more dirt
+						if(whatore > 9-1){
 							getMap().server_SetTile(pos, 16); //dirt
 						}
-						else if (whatore == 9-1 || whatore == 8-1 || whatore == 7-1){
+						else if (whatore == 8-1 || whatore == 7-1){
 							getMap().server_SetTile(pos, 80); //gold
 						}
 						else if (whatore == 6-1 || whatore == 5-1 || whatore == 4-1){
@@ -257,6 +490,54 @@ bool onServerProcessChat(CRules@ this, const string& in text_in, string& out tex
 					}
 				}
 			}
+			return true;
+		}
+		else if (text_in == "!generateore"){
+			OreChunk();
+			return true;
+		}
+		else if (text_in == "!removeore"){
+            for(int y = 0; y < getMap().tilemapheight; ++y){
+                for(int x = 0; x < getMap().tilemapwidth; ++x){
+					Vec2f pos = Vec2f(x,y)*8.0f;
+					//all the ore values, including dirt.
+					if(getMap().getTile(pos).type == 16 || getMap().getTile(pos).type == 17 || getMap().getTile(pos).type == 18 || getMap().getTile(pos).type == 19 || getMap().getTile(pos).type == 20 || getMap().getTile(pos).type == 21 || getMap().getTile(pos).type == 22 || getMap().getTile(pos).type == 23 || getMap().getTile(pos).type == 24 || getMap().getTile(pos).type == 29 || getMap().getTile(pos).type == 30 || getMap().getTile(pos).type == 31 || getMap().getTile(pos).type == 80 || getMap().getTile(pos).type == 81 || getMap().getTile(pos).type == 81 || getMap().getTile(pos).type == 82 || getMap().getTile(pos).type == 83 || getMap().getTile(pos).type == 84 || getMap().getTile(pos).type == 85 || getMap().getTile(pos).type == 90 || getMap().getTile(pos).type == 91 || getMap().getTile(pos).type == 92 || getMap().getTile(pos).type == 93 || getMap().getTile(pos).type == 94 || getMap().getTile(pos).type == 96 || getMap().getTile(pos).type == 97 || getMap().getTile(pos).type == 100 || getMap().getTile(pos).type == 101 || getMap().getTile(pos).type == 102 || getMap().getTile(pos).type == 103 || getMap().getTile(pos).type == 104 || getMap().getTile(pos).type == 208 || getMap().getTile(pos).type == 209 || getMap().getTile(pos).type == 214 || getMap().getTile(pos).type == 215 || getMap().getTile(pos).type == 216 || getMap().getTile(pos).type == 217 || getMap().getTile(pos).type == 218){ //only run if it is an ore or dirt
+						getMap().server_SetTile(pos, 16); //dirt
+					}
+				}
+			}
+			return true;
+		}
+		else if (text_in == "!placebedrock" || text_in == "!generatebedrock"){
+            GenerateBedrock();
+			return true;
+		}
+		else if (text_in == "!removebedrock"){ //turn bedrock to dirt
+            for(int y = 0; y < getMap().tilemapheight; ++y){
+                for(int x = 0; x < getMap().tilemapwidth; ++x){
+					Vec2f pos = Vec2f(x,y)*8.0f;
+					//all the ore values, including dirt.
+					if(getMap().getTile(pos).type == 106){ //only run if it is an ore or dirt
+						getMap().server_SetTile(pos, 16); //dirt
+					}
+				}
+			}
+			return true;
+		}
+		else if (text_in == "!placedirt" || text_in == "!generatedirt"){
+			PlaceDirt();
+			return true;
+		}
+		else if (text_in == "!generateall"){
+			GenerateBedrock();
+			PlaceDirt();
+            for(int y = 0; y < getMap().tilemapheight; ++y){ //placenature();
+                for(int x = 0; x < getMap().tilemapwidth; ++x){
+                    Vec2f pos = Vec2f(x,y)*8.0f;
+                    PlaceNature(getMap().getTile(pos).type,pos);
+                }
+            }
+			return true;
 		}
 	}
 
@@ -454,25 +735,28 @@ bool onServerProcessChat(CRules@ this, const string& in text_in, string& out tex
 				}
 				else if(tokens[0] == "!generatemap" || tokens[0] == "!gm")
 				{
-					CRules@ myrule = getRules();
-					//the laws of reality are ours
-					int width = parseInt(tokens[1]);
-					int height = parseInt(tokens[2]);
+					if(tokens[1].length != 0 && tokens[2].length != 0){
+						CRules@ myrule = getRules();
+						//the laws of reality are ours
+						int width = parseInt(tokens[1]);
+						int height = parseInt(tokens[2]);
 
+						myrule.set_s32("width", width);
+						myrule.set_s32("height", height);
+						//we need to call the global function LoadMap engine side, less go
+						if(getNet().isServer())
+						{
+							LoadMap("Maps/test.kaggen.cfg");
+							print("i am a server");
+						}
+						else{
+						}
 
-					myrule.set_s32("width", width);
-					myrule.set_s32("height", height);
-					//we need to call the global function LoadMap engine side, less go
-					if(getNet().isServer())
-					{
-						LoadMap("Maps/test.kaggen.cfg");
-						print("i am a server");
+						return true;
 					}
 					else{
+						errorMessage = "Please provide valid map values\nExample: !generatemap 50 50";
 					}
-					
-					text_out = "";
-					return false;
 				}
 			}
 			else

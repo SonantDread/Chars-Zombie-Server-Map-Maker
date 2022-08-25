@@ -20,7 +20,7 @@ void onTick(CRules@ rules){
 			}
 		}
 
-        int gold = 0;
+        /*int gold = 0;
         int stone = 0;
         int thickstone = 0;
 
@@ -37,8 +37,8 @@ void onTick(CRules@ rules){
                     thickstone++;
                 }
             }
-        }
+        }*/
 
-        rules.SetGlobalMessage("Max Zombies: " + max_zombies + "\nMax Portal Zombies: " + max_portal_zombies + "\nMap Width: " + map.tilemapwidth + "\nMap Height: " + map.tilemapheight + "\nZombie Portals: " + portals + "\nMap Resources: \n-Gold Ore: " + gold + "\n-Stone Ore: " +stone + "\n-Thickstone Ore: " + thickstone);
+        rules.SetGlobalMessage("Max Zombies: " + max_zombies + "\nMax Portal Zombies: " + max_portal_zombies + "\nMap Width: " + map.tilemapwidth + "\nMap Height: " + map.tilemapheight + "\nZombie Portals: " + portals/* + "\nMap Resources: \n-Gold Ore: " + gold + "\n-Stone Ore: " +stone + "\n-Thickstone Ore: " + thickstone*/);
     }
 }

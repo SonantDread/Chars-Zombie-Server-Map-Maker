@@ -135,7 +135,8 @@ u8 getBuildBlobIndex(string name)
 
 	//CharZFB, PAGE 7
 	"ZombiePortal",
-	"abomination",
+	"zombiespawn"
+	/*"abomination",
 	"chainsaw",
 	"gaslantern",
 	"Skeleton",
@@ -143,7 +144,7 @@ u8 getBuildBlobIndex(string name)
 	"Zombie",
 	"Zombiearm",
 	"BossZombieKnight",
-	"ZombieKnight"
+	"ZombieKnight"*/
     };
 
  	for (uint i = 0; i < blobNames.length; i++)
