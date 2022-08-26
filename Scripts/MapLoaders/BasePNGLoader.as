@@ -593,6 +593,11 @@ class PNGLoader
 			spawnBlob(map, "ZombiePortal", offset, -1, true);
 			offsets[autotile_offset].push_back( offset );
 		}
+		else if (pixel == color_playerspawn)
+		{
+			spawnBlob(map, "playerspawn", offset, -1, true);
+			offsets[autotile_offset].push_back( offset );
+		}
 		else if (pixel == color_zombie_spawn){
 			spawnBlob(map, "zombiespawn", offset, -1, true);
 			offsets[autotile_offset].push_back( offset );
@@ -1617,6 +1622,10 @@ void getInfoFromBlob(CBlob@ this, SColor &out color, Vec2f &out offset)
 		else if(name == "ZombiePortal")
 		{
 			color = color_ZombiePortal;
+		}
+		else if(name == "playerspawn")
+		{
+			color = color_playerspawn;
 		}
 		else if(name == "zombiespawn")
 		{

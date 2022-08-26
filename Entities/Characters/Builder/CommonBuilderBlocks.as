@@ -626,6 +626,10 @@ void addCommonBuilderBlocks(BuildBlock[][]@ blocks)
 		BuildBlock b(0, "zombiespawn", "$zombiespawn$", "Zombie Spawn");
 		blocks[7].push_back(b);
 	}
+	{
+		BuildBlock b(0, "playerspawn", "$playerspawn$", "Player Spawn");
+		blocks[7].push_back(b);
+	}
 	/*{
 		BuildBlock b(0, "abomination", "$abomination$", "Abomination");
 		blocks[7].push_back(b);

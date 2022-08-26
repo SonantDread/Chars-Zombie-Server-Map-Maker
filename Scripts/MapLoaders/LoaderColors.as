@@ -280,3 +280,4 @@ const SColor color_ZombieArm(0xFFf84e87);
 const SColor color_BossZombieKnight(0xFF93e078);
 const SColor color_ZombieKnight(0xFFf8e77a);
 const SColor color_zombie_spawn(0xFFBBBA59);
+const SColor color_playerspawn(0xFF77c277);

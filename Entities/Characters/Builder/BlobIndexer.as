@@ -135,7 +135,8 @@ u8 getBuildBlobIndex(string name)
 
 	//CharZFB, PAGE 7
 	"ZombiePortal",
-	"zombiespawn"
+	"zombiespawn",
+	"playerspawn"
 	/*"abomination",
 	"chainsaw",
 	"gaslantern",
