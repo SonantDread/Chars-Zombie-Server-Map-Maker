@@ -102,7 +102,7 @@ bool IsOre(Vec2f pos){ //is this ore?
 bool CheckOres(Vec2f pos,uint radius){ //this will check if there is at least one ore in a radius * radius square area
 	for(int x = 0; x < radius+1; x++){ //+1 because we also check the ore in the center
 		for(int y = 0; y < radius+1; y++){
-			if(IsOre(Vec2f(pos.x+x*8.0f,pos.y+y*8.0f))){
+			if(IsOre(Vec2f((pos.x+x*8.0f)*0.5f,(pos.y+y*8.0f)*0.5f))){
 				return true; //ore is found
 			}
 		}
@@ -289,42 +289,58 @@ void PlaceDirt(){
 			//map.server_SetTile(Vec2f((x*8.0f)*(place*5.0f)*2.0f,baseline*8.0f+32.0f), 106); 
 			map.server_SetTile(Vec2f(x*8,getMap().tilemapheight*4.0f-final_sine),16); 
 		}
-	//}
 	//fix for being very holey
     for(int y = 0; y < getMap().tilemapheight; y++){
     	for(int x = 0; x < getMap().tilemapwidth; x++){
 			Vec2f pos = Vec2f(x*8.0f,y*8.0f);
 			if(map.getTile(pos).type == 16){
 				if(map.getTile(Vec2f(x*8.0f,y*8.0f+8.0f)).type == 0){
-					map.server_SetTile(Vec2f(x*8.0f,y*8.0f+8.0f), 16);// PlaceBlocks(Vec2f(x*8.0f,y*8.0f-88.0f), "down", 100, 16);
+					map.server_SetTile(Vec2f(x*8.0f,y*8.0f+8.0f), 16);
 				}
 			}
 		}
 	}
 }
 
-void OreChunk(){ //todo: generate something that these will replace
-    for(int y = 0; y < getMap().tilemapheight; y++){
-        for(int x = 0; x < getMap().tilemapwidth; x++){ //loop through the map
-			if(getMap().getTile(Vec2f(x*8.0f,y*8.0f)).type == 16){
-				if(CheckOres(Vec2f(x*8.0f,y*8.0f),2) == true){
-					Vec2f pos = Vec2f(x*8.0f, y*8.0f);
-					int whatore = XORRandom(12); //what ore are we placing?
-					if(whatore > 9-1){
-						getMap().server_SetTile(pos, 16); //dirt
-					}
-					if (whatore == 8-1){
-						getMap().server_SetTile(pos, 80); //gold
-					}
-					else if (whatore == 7-1 || whatore == 6-1 || whatore == 5-1 || whatore == 4-1 || whatore == 3-1){
-						getMap().server_SetTile(pos, 96); //stone
-					}
-					else if (whatore == 2-1 || whatore == 1-1){
-						getMap().server_SetTile(pos, 208); //thick stone
+int genore(){ //for OreChunk()
+	int whatore = XORRandom(12); //what ore are we placing?
+	if(whatore > 7){
+		return 16; //dirt
+	}
+	if (whatore == 7){
+		return 80; //gold
+	}
+	else if (whatore == 6 || whatore == 5 || whatore == 4 || whatore == 3 || whatore == 2){
+		return 96; //stone
+	}
+	else if (whatore == 1 || whatore == 0){
+		return 208; //thick stone
+	}
+	print("failed to generate a correct value.");
+	return 16;
+}
+
+void OreChunk(){
+	for(int y = 0; y < getMap().tilemapheight; y++){
+		for(int x = 0; x < getMap().tilemapwidth; x++){
+			Vec2f pos = Vec2f(x*8.0f, y*8.0f);
+			if(getMap().getTile(pos).type == 16){ //dirt
+				if(x*8.0f % (XORRandom(4.0f)+3.0f*8.0f) == 0 && y*8.0f % (XORRandom(4.0f)+3.0f*8.0f) == 0){
+					int radius = XORRandom(4)+1; //1-5
+					for(int x = 0; x < radius+1; x++){ //+1 because we also check the ore in the center
+						for(int y = 0; y < radius+1; y++){
+							if(getMap().getTile(Vec2f(pos.x+x*8.0f,pos.y+y*8.0f)).type == 16){ //only go onto dirt...
+								getMap().server_SetTile(Vec2f(pos.x+x*8.0f,pos.y+y*8.0f), genore()); //up and left
+							}
+							if(getMap().getTile(Vec2f(pos.x-x*8.0f,pos.y-y*8.0f)).type == 16){
+								getMap().server_SetTile(Vec2f(pos.x-x*8.0f,pos.y-y*8.0f), genore()); //down and right
+							}
+						}
 					}
 				}
 			}
 		}
+		//todo: some type of smoothing system...
 	}
 }
 
@@ -531,12 +547,14 @@ bool onServerProcessChat(CRules@ this, const string& in text_in, string& out tex
 		else if (text_in == "!generateall"){
 			GenerateBedrock();
 			PlaceDirt();
+			OreChunk();
             for(int y = 0; y < getMap().tilemapheight; ++y){ //placenature();
                 for(int x = 0; x < getMap().tilemapwidth; ++x){
                     Vec2f pos = Vec2f(x,y)*8.0f;
                     PlaceNature(getMap().getTile(pos).type,pos);
                 }
             }
+			// OreChunk();
 			return true;
 		}
 	}
