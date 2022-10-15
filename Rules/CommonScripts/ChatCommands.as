@@ -89,7 +89,6 @@ void GenerateBedrock(){
 bool IsOre(Vec2f pos){ //is this ore?
 	int a = getMap().getTile(pos).type;
 	if(a == 80 || a == 81 || a == 81 || a == 82 || a == 83 || a == 84 || a == 85 || a == 90 || a == 91 || a == 92 || a == 93 || a == 94 || a == 96 || a == 97 || a == 100 || a == 101 || a == 102 || a == 103 || a == 104 || a == 208 || a == 209 || a == 214 || a == 215 || a == 216 || a == 217 || a == 218){
-		print(""+a);
 		return true;
 	}
 	else{
@@ -209,15 +208,15 @@ void PlaceNature(uint16 tileType, Vec2f pos)
         pos2.x = pos.x;
         pos2.y = pos.y-8.0f;
 		int random = XORRandom(10); //10 so these can be percents
-		if (random < 8-1){ //grass
+		if (random < 7){ //grass
 			if(map.getTile(pos2).type == 0){ //search for air
 				PlaceGrass(pos2); //set tile to grass
         	}
 		}
 
-		else if (random == 9-1){ //trees
+		else if (random == 8){ //trees
 			int whichtree = XORRandom(2); //which tree should we generate?
-			if (whichtree == 2-1){ // pine tree
+			if (whichtree == 1){ // pine tree
 				float pos3 = pos2.y;
 				//we are already one block up
 				//can the tree fully grow here?
@@ -236,7 +235,7 @@ void PlaceNature(uint16 tileType, Vec2f pos)
 					}
 				}
 			}
-			else if (whichtree == 1-1){ //bushy tree
+			else if (whichtree == 0){ //bushy tree
 				float pos3 = pos2.y;
 				//we are already one block up
 				//can the tree fully grow here?
@@ -256,7 +255,7 @@ void PlaceNature(uint16 tileType, Vec2f pos)
 			}
 		}
 
-		else if (random == 10-1){ //flower
+		else if (random == 9){ //flower
 			if(map.getTile(pos2).type == 0){
 				server_CreateBlob("flowers",-1,pos2);
 			}
@@ -302,7 +301,7 @@ void PlaceDirt(){
 	}
 }
 
-int genore(){ //for OreChunk()
+int genore(){
 	int whatore = XORRandom(12); //what ore are we placing?
 	if(whatore > 7){
 		return 16; //dirt
@@ -318,6 +317,31 @@ int genore(){ //for OreChunk()
 	}
 	print("failed to generate a correct value.");
 	return 16;
+}
+
+void SpawnPlacement(){
+    float dist = XORRandom(10.0f)+7.0f; //distance away from the edges
+
+    int blue = 0;
+    int red = getMap().tilemapwidth;
+
+	print("red:" + red);
+	print("distance:" + dist);
+	print("redfinaldist:" + int(red-dist));
+
+    string blob = "playerspawn";
+
+	blue = dist;
+    red = red-dist; //red's equal for spawn
+
+    for(int y = getMap().tilemapheight; y >= 0; y--){
+		if(getMap().getTile(Vec2f(blue*8.0f,y*8.0f)).type == 16 && getMap().getTile(Vec2f(blue*8.0f,y*8.0f-8.0f)).type == 0){ //blue spawn
+			server_CreateBlob(blob,0,Vec2f(blue*8.0f,y*8.0f-16.0f));
+		}
+		if(getMap().getTile(Vec2f(red*8.0f,y*8.0f)).type == 16 && getMap().getTile(Vec2f(red*8.0f,y*8.0f-8.0f)).type == 0){ //red spawn
+			server_CreateBlob(blob,1,Vec2f(red*8.0f,y*8.0f-16.0f));
+		}
+	}
 }
 
 void OreChunk(){
@@ -341,6 +365,77 @@ void OreChunk(){
 			}
 		}
 		//todo: some type of smoothing system...
+	}
+}
+
+bool IsAreaClear(Vec2f pos, int x2, int y2){
+	for(int x = 0; x < x2+1; x++){ //+1 because we also check the center
+		for(int y = 0; y < y2+1; y++){
+			Vec2f pos = Vec2f(x*8.0f,y*8.0f);
+			//only need to check left / right & up
+			if(getMap().getTile(Vec2f(pos.x-(8.0f*x),pos.y)).type != 16 || !IsOre(Vec2f(pos.x-(8.0f*x),pos.y))){
+				return false;
+			}
+
+			if(getMap().getTile(Vec2f(pos.x,pos.y-(8.0f*y))).type != 16 || !IsOre(Vec2f(pos.x,pos.y-(8.0f*y)))){
+				return false;
+			}
+
+			/*if(getMap().getTile(Vec2f(pos.x+(8.0f*x),pos.y)).type != 16 || !IsOre(Vec2f(pos.x+(8.0f*x),pos.y))){
+				return false;
+			}
+
+			if(getMap().getTile(Vec2f(pos.x,pos.y+(8.0f*y))).type != 16 || !IsOre(Vec2f(pos.x,pos.y+(8.0f*y)))){
+				return false;
+			}
+			if(getMap().getTile(Vec2f(pos.x-(8.0f*x),pos.y-(8.0f*y))).type != 16 || !IsOre(Vec2f(pos.x-(8.0f*x),pos.y))){
+				print("c");
+				return false;
+			}
+
+			if(getMap().getTile(Vec2f(pos.x-(8.0f*x),pos.y-(8.0f*y))).type != 16 || !IsOre(Vec2f(pos.x,pos.y-(8.0f*y)))){
+				print("d");
+				return false;
+			}
+
+			if(getMap().getTile(Vec2f(pos.x+(8.0f*x),pos.y+(8.0f*y))).type != 16 || !IsOre(Vec2f(pos.x+(8.0f*x),pos.y))){
+				return false;
+			}
+
+			if(getMap().getTile(Vec2f(pos.x+(8.0f*x),pos.y+(8.0f*y))).type != 16 || !IsOre(Vec2f(pos.x,pos.y+(8.0f*y)))){
+				return false;
+			}*/ //checked +-xy
+		}
+	}
+	return true;
+}
+
+bool IsBlobNearby(Vec2f pos, float dist, string blob){
+	CBlob@[] blobs;
+	getMap().getBlobsInRadius(pos, dist, @blobs);
+
+	getBlobsByName("ZombiePortal", @blobs);
+	if(blobs.size() == 0){
+		return false;
+	}
+	else{
+		return true;
+	}
+}
+
+void ZombiePortals(){
+	for(int y = 0; y < getMap().tilemapheight; y++){
+		for(int x = 0; x < getMap().tilemapwidth; x++){
+			Vec2f pos = Vec2f(x*8.0f,y*8.0f);
+			if(getMap().getTile(pos).type == 16){ //dirt
+				print(""+IsAreaClear(pos,5,8));
+				print(""+IsBlobNearby(pos, 10.0f,"ZombiePortal"));
+				if(IsAreaClear(pos,5,8) && !IsBlobNearby(pos, 10.0f,"ZombiePortal")){
+					server_CreateBlob("ZombiePortal",-1,pos);
+					print("hello");
+				}
+			}
+		}
 	}
 }
 
@@ -456,6 +551,10 @@ bool onServerProcessChat(CRules@ this, const string& in text_in, string& out tex
             }
 			return true;
         }
+		else if (text_in == "!placespawn" || text_in == "!generatespawn"){
+			SpawnPlacement();
+			return true;	
+		}
 		else if (text_in == "!removenature"){
             for(int y = 0; y < getMap().tilemapheight; ++y){
                 for(int x = 0; x < getMap().tilemapwidth; ++x){
@@ -544,17 +643,22 @@ bool onServerProcessChat(CRules@ this, const string& in text_in, string& out tex
 			PlaceDirt();
 			return true;
 		}
-		else if (text_in == "!generateall"){
-			GenerateBedrock();
-			PlaceDirt();
-			OreChunk();
+		else if (text_in == "!zombiespawn" || text_in == "!zombiespawns"){
+			ZombiePortals();
+			return true;
+		}
+		else if (text_in == "!generateall" || text_in == "!placeall"){
+			GenerateBedrock(); //generate the bottom, will be broken
+			PlaceDirt(); //place the dirt
+			OreChunk(); //generate ores
+			SpawnPlacement(); //place spawns
+			// ZombiePortals();
             for(int y = 0; y < getMap().tilemapheight; ++y){ //placenature();
                 for(int x = 0; x < getMap().tilemapwidth; ++x){
                     Vec2f pos = Vec2f(x,y)*8.0f;
                     PlaceNature(getMap().getTile(pos).type,pos);
                 }
             }
-			// OreChunk();
 			return true;
 		}
 	}
