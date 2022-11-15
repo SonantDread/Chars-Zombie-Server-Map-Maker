@@ -23,6 +23,17 @@ void onInit(CBlob@ this)
 	this.getCurrentScript().removeIfTag = "dead";
 }
 
+void server_PutIn(CBlob@ this, CBlob@ picker, CBlob@ pickBlob)
+{
+	CInventory@ inv = this.getInventory();
+	if (pickBlob is null || picker is null || !inv.canPutItem(pickBlob))
+		return;
+	CBitStream params;
+	params.write_netid(picker.getNetworkID());
+	params.write_netid(pickBlob.getNetworkID());
+	this.SendCommand(this.getCommandID("putin"), params);
+}
+
 void onCommand(CBlob@ this, u8 cmd, CBitStream @params)
 {
 	if (!getNet().isServer())                                // server only!
