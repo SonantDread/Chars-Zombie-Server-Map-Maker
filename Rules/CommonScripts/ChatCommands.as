@@ -211,7 +211,7 @@ void PlaceNature(uint16 tileType, Vec2f pos)
 		if (random < 7){ //grass
 			if(map.getTile(pos2).type == 0){ //search for air
 				PlaceGrass(pos2); //set tile to grass
-        	}
+			}
 		}
 
 		else if (random == 8){ //trees
@@ -255,9 +255,17 @@ void PlaceNature(uint16 tileType, Vec2f pos)
 			}
 		}
 
-		else if (random == 9){ //flower
+		else if (random == 9){ //flower or grain
 			if(map.getTile(pos2).type == 0){
-				server_CreateBlob("flowers",-1,pos2);
+				if(XORRandom(2) == 1){
+					CBlob@ grain = server_CreateBlobNoInit("grain_plant");
+					grain.setPosition(Vec2f(pos2.x+4.0f,pos2.y+4.0f));
+					grain.Init();
+					grain.getShape().SetStatic(true);
+				}
+				else{
+					server_CreateBlob("flowers",-1,pos2);
+				}
 			}
 		}
     }
@@ -270,7 +278,7 @@ void PlaceDirt(){
 		int nb_of_mountains = 4;
 		float amplitude = 1.5f; // between 0.5 and 2 is prob good
 		float roughness_attenuation = 0.1f; //here, higher mean less scuffed, between 0.5 and 1 is prob good
-		nb_of_mountains = XORRandom(5)+1;//0.25f+(1/(XORRandom(30)+1))*(5.0f - 0.25f);
+		nb_of_mountains = XORRandom(5)+1;
 		amplitude = 0.30f+(1/float(XORRandom(10000)+1))*(1.5f - 0.50f);
 		roughness_attenuation = (1/float(XORRandom(100)+1))*(0.5f);
 		bool onlyPositive = false;
@@ -285,7 +293,6 @@ void PlaceDirt(){
 			if (onlyPositive){
 				final_sine = Maths::Abs(baseline_height_2)+Maths::Abs(baseline_height)+roughness_baseline;
 			}
-			//map.server_SetTile(Vec2f((x*8.0f)*(place*5.0f)*2.0f,baseline*8.0f+32.0f), 106); 
 			map.server_SetTile(Vec2f(x*8,getMap().tilemapheight*4.0f-final_sine),16); 
 		}
 	//fix for being very holey
@@ -344,12 +351,17 @@ void SpawnPlacement(){
 	}
 }
 
-void OreChunk(){
+void OreChunk(float radiusx, float radiusy){
+	//unfortunately required to be converted to int
+	radiusx = Maths::Roundf(radiusx);
+	radiusy = Maths::Roundf(radiusy);
+	print("RADIUSX: " + radiusx);
+	print("RADIUSY: " + radiusy);
 	for(int y = 0; y < getMap().tilemapheight; y++){
 		for(int x = 0; x < getMap().tilemapwidth; x++){
 			Vec2f pos = Vec2f(x*8.0f, y*8.0f);
 			if(getMap().getTile(pos).type == 16){ //dirt
-				if(x*8.0f % (XORRandom(4.0f)+3.0f*8.0f) == 0 && y*8.0f % (XORRandom(4.0f)+3.0f*8.0f) == 0){
+				if(x*8.0f % (XORRandom(4.0f)+radiusx*8.0f) == 0 && y*8.0f % (XORRandom(4.0f)+radiusy*8.0f) == 0){
 					int radius = XORRandom(4)+1; //1-5
 					for(int x = 0; x < radius+1; x++){ //+1 because we also check the ore in the center
 						for(int y = 0; y < radius+1; y++){
@@ -607,8 +619,19 @@ bool onServerProcessChat(CRules@ this, const string& in text_in, string& out tex
 			}
 			return true;
 		}
-		else if (text_in == "!generateore"){
-			OreChunk();
+		else if (text_in.substr(0,"!generateore".length) == "!generateore" || text_in.substr(0,"!generateores".length) == "!generateores"){
+			string[]@ tokens = text_in.split(" ");
+			float x_value = 3.0f; // 3.0f is previous default values
+			float y_value = 3.0f;
+			if(tokens.length > 1){
+				x_value = parseFloat(tokens[1]);
+			}
+
+			if(tokens.length > 2){
+				y_value = parseFloat(tokens[2]);
+			}
+
+			OreChunk(x_value, y_value);
 			return true;
 		}
 		else if (text_in == "!removeore"){
@@ -650,7 +673,7 @@ bool onServerProcessChat(CRules@ this, const string& in text_in, string& out tex
 		else if (text_in == "!generateall" || text_in == "!placeall"){
 			GenerateBedrock(); //generate the bottom, will be broken
 			PlaceDirt(); //place the dirt
-			OreChunk(); //generate ores
+			OreChunk(3.0f,3.0f); //generate ores
 			SpawnPlacement(); //place spawns
 			// ZombiePortals();
             for(int y = 0; y < getMap().tilemapheight; ++y){ //placenature();
