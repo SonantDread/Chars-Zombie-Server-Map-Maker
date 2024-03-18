@@ -91,8 +91,8 @@ void onTick(CMovement@ this)
 	if (onground || blob.isInWater())  //also reset when vaulting
 	{
 		moveVars.walljumped_side = Walljump::NONE;
-		moveVars.wallrun_start = pos.y;
-		moveVars.wallrun_current = pos.y;
+		// moveVars.wallrun_start = pos.y;
+		// moveVars.wallrun_current = pos.y;
 		moveVars.fallCount = -1;
 	}
 
@@ -287,53 +287,53 @@ void onTick(CMovement@ this)
 				if (left && surface_left && (moveVars.walljumped_side == Walljump::RIGHT || jumpedRIGHT || wasNONE))
 				{
 					moveVars.walljumped_side = Walljump::LEFT;
-					moveVars.wallrun_start = pos.y;
-					moveVars.wallrun_current = pos.y + 1.0f;
+					// moveVars.wallrun_start = pos.y;
+					// moveVars.wallrun_current = pos.y + 1.0f;
 					set_contact = true;
 				}
 				if (right && surface_right && (moveVars.walljumped_side == Walljump::LEFT || jumpedLEFT || wasNONE))
 				{
 					moveVars.walljumped_side = Walljump::RIGHT;
-					moveVars.wallrun_start = pos.y;
-					moveVars.wallrun_current = pos.y + 1.0f;
+					// moveVars.wallrun_start = pos.y;
+					// moveVars.wallrun_current = pos.y + 1.0f;
 					set_contact = true;
 				}
 
 				//wallrun
-				if (!surface_above && vel.y < slidespeed &&
-				        ((left && surface_left && !jumpedLEFT) || (right && surface_right && !jumpedRIGHT) || set_contact))
-				{
-					//within range
-					if (set_contact ||
-					        (pos.y - 1.0f < moveVars.wallrun_current &&
-					         pos.y + 1.0f > moveVars.wallrun_start - map.tilesize * moveVars.wallrun_length))
-					{
-						moveVars.wallrun_current = Maths::Min(pos.y - 1.0f, moveVars.wallrun_current - 1.0f);
+				// if (!surface_above && vel.y < slidespeed &&
+				//         ((left && surface_left && !jumpedLEFT) || (right && surface_right && !jumpedRIGHT) || set_contact))
+				// {
+				// 	//within range
+				// 	if (set_contact ||
+				// 	        (pos.y - 1.0f < moveVars.wallrun_current &&
+				// 	         pos.y + 1.0f > moveVars.wallrun_start - map.tilesize * moveVars.wallrun_length))
+				// 	{
+				// 		moveVars.wallrun_current = Maths::Min(pos.y - 1.0f, moveVars.wallrun_current - 1.0f);
 
-						moveVars.walljumped = true;
-						if (set_contact || getGameTime() % 5 == 0)
-						{
-							dust = true;
+				// 		moveVars.walljumped = true;
+				// 		if (set_contact || getGameTime() % 5 == 0)
+				// 		{
+				// 			dust = true;
 
-							f32 wallrun_speed = moveVars.jumpMaxVel * 1.2f;
+				// 			f32 wallrun_speed = moveVars.jumpMaxVel * 1.2f;
 
-							if (vel.y > -wallrun_speed || set_contact)
-							{
-								vel.Set(0, -wallrun_speed);
-								blob.setVelocity(vel);
-							}
+				// 			if (vel.y > -wallrun_speed || set_contact)
+				// 			{
+				// 				vel.Set(0, -wallrun_speed);
+				// 				blob.setVelocity(vel);
+				// 			}
 
-							if (!set_contact)
-							{
-								blob.getSprite().PlayRandomSound("/StoneJump");
-							}
-						}
-					}
-					else
-					{
-						moveVars.walljumped = false;
-					}
-				}
+				// 			if (!set_contact)
+				// 			{
+				// 				blob.getSprite().PlayRandomSound("/StoneJump");
+				// 			}
+				// 		}
+				// 	}
+				// 	else
+				// 	{
+				// 		moveVars.walljumped = false;
+				// 	}
+				// }
 				//walljump
 				else if (vel.y < slidespeed &&
 				         ((left && surface_right) || (right && surface_left)) &&
@@ -452,8 +452,8 @@ void onTick(CMovement@ this)
 				moveVars.jumpCount = -3;
 
 				moveVars.walljumped_side = Walljump::NONE;
-				moveVars.wallrun_start = pos.y;
-				moveVars.wallrun_current = pos.y;
+				// moveVars.wallrun_start = pos.y;
+				// moveVars.wallrun_current = pos.y;
 			}
 		}
 	}
